@@ -22,9 +22,21 @@ class CLIMBINGSYSTEM_API UCustomMovementComponent : public UCharacterMovementCom
 {
 	GENERATED_BODY()
 	
-public:
+protected:
+
+#pragma region OverridenFunctions
 
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
+
+	virtual void PhysCustom(float deltaTime, int32 Iterations) override;
+
+	virtual float GetMaxSpeed() const override;
+
+	virtual float GetMaxAcceleration() const override;
+
+#pragma endregion
 
 private:
 
@@ -44,11 +56,29 @@ private:
 
 	bool CanStartClimbing();
 
+	void StartClimbing();
+
+	void StopClimbing();
+
+	void PhysClimb(float deltaTime, int32 Iterations);
+
+	void ProcessClimableSurfaceInfo();
+
+	bool CheckShouldStopClimbing();
+
+	FQuat GetClimbRotation(float DeltaTime);
+
+	void SnapMovementToClimableSurfaces(float DeltaTime);
+
 #pragma endregion
 
 #pragma region ClimbCoreVariables
 
 	TArray<FHitResult> ClimbableSurfacesTracedResults;
+
+	FVector CurrentClimbableSurfaceLocation;
+
+	FVector CurrentClimbableSurfaceNormal;
 
 #pragma endregion
 
@@ -63,6 +93,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement: Climbing", meta = (AllowPrivateAccess = "true"))
 	float ClimbCapsuleTraceHalfHeight = 72.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement: Climbing", meta = (AllowPrivateAccess = "true"))
+	float MaxBreakClimbDeceleration = 400.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement: Climbing", meta = (AllowPrivateAccess = "true"))
+	float MaxClimbSpeed = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement: Climbing", meta = (AllowPrivateAccess = "true"))
+	float MaxClimbAcceleration = 300.0f;
+
 #pragma endregion
 
 public:
@@ -70,4 +109,6 @@ public:
 	void ToggleClimbing(bool bEnableClimb);
 
 	bool IsClimbing() const;
+
+	FORCEINLINE FVector GetClimbableSurfaceNormal() const { return CurrentClimbableSurfaceNormal; };
 };
